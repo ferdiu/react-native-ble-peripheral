@@ -49,6 +49,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     AdvertiseCallback advertisingCallback;
     String name;
     boolean advertising;
+    private String invalidDeviceAddress = null;
     private Context context;
     private boolean serverIsReady = false;
 
@@ -94,9 +95,14 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             super.onConnectionStateChange(device, status, newState);
             
             if (!serverIsReady) {
+                invalidDeviceAddress = device.toString();
                 return;
             }
-            
+
+            if (invalidDeviceAddress != null && invalidDeviceAddress == device.toString()) {
+                return;
+            }
+
             boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
             if (connected) {
                 mBluetoothDevices.add(device);
