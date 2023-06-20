@@ -47,6 +47,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     BluetoothGattServer mGattServer;
     BluetoothLeAdvertiser advertiser;
     AdvertiseCallback advertisingCallback;
+    AdvertiseSettings settings;
     String name;
     boolean advertising;
     private Context context;
@@ -156,7 +157,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
                 mGattServer.addService(service);
             }
             advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-            AdvertiseSettings settings = new AdvertiseSettings.Builder()
+            settings = new AdvertiseSettings.Builder()
                     .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                     .setConnectable(true)
