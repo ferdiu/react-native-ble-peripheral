@@ -143,7 +143,6 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
 
     @ReactMethod
     public void start(final Promise promise){
-        this.stop();
         mBluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         mBluetoothAdapter.setName(this.name);
