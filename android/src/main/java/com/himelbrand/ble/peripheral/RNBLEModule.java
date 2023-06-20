@@ -50,6 +50,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     String name;
     boolean advertising;
     private Context context;
+    private boolean serverIsReady = false;
 
     public RNBLEModule(ReactApplicationContext reactContext) {
         super(reactContext);
@@ -91,6 +92,11 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         @Override
         public void onConnectionStateChange(BluetoothDevice device, final int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
+            
+            if (!serverIsReady) {
+                return;
+            }
+            
             boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
             if (connected) {
                 mBluetoothDevices.add(device);
@@ -99,7 +105,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             }
             WritableMap map = Arguments.createMap();
             map.putString("connected", String.valueOf(connected));
-            map.putString("device", device.getName());
+            map.putString("device", device.toString());
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("BleStatusChangeEvent", map);
         }
 
@@ -192,6 +198,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         }
 
         advertiser.startAdvertising(settings, data, advertisingCallback);
+        serverIsReady = true;
 
     }
     @ReactMethod
