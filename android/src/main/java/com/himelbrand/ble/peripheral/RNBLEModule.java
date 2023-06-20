@@ -47,8 +47,6 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     BluetoothGattServer mGattServer;
     BluetoothLeAdvertiser advertiser;
     AdvertiseCallback advertisingCallback;
-    AdvertiseSettings advertisingSettings;
-    AdvertiseData advertisingData;
     String name;
     boolean advertising;
     private Context context;
@@ -145,58 +143,53 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
 
     @ReactMethod
     public void start(final Promise promise){
-        if (advertisingCallback == null) {
-            mBluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
-            mBluetoothAdapter = mBluetoothManager.getAdapter();
-            mBluetoothAdapter.setName(this.name);
-            // Ensures Bluetooth is available on the device and it is enabled. If not,
-            // displays a dialog requesting user permission to enable Bluetooth.
+        this.stop();
+        mBluetoothManager = (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+        mBluetoothAdapter.setName(this.name);
+        // Ensures Bluetooth is available on the device and it is enabled. If not,
+        // displays a dialog requesting user permission to enable Bluetooth.
 
-            mBluetoothDevices = new HashSet<>();
-            mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
-            for (BluetoothGattService service : this.servicesMap.values()) {
-                mGattServer.addService(service);
-            }
-            advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-            advertisingSettings = new AdvertiseSettings.Builder()
-                    .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-                    .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
-                    .setConnectable(true)
-                    .build();
-
-
-            AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder()
-                    .setIncludeDeviceName(true);
-            for (BluetoothGattService service : this.servicesMap.values()) {
-                dataBuilder.addServiceUuid(new ParcelUuid(service.getUuid()));
-            }
-            AdvertiseData advertisingData = dataBuilder.build();
-            Log.i("RNBLEModule", advertisingData.toString());
-
-            advertisingCallback = new AdvertiseCallback() {
-                @Override
-                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    super.onStartSuccess(settingsInEffect);
-                    advertising = true;
-                    promise.resolve("Success, Started Advertising");
-
-                }
-
-                @Override
-                public void onStartFailure(int errorCode) {
-                    advertising = false;
-                    Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
-                    promise.reject("Advertising onStartFailure: " + errorCode);
-                    super.onStartFailure(errorCode);
-                }
-            };
+        mBluetoothDevices = new HashSet<>();
+        mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
+        for (BluetoothGattService service : this.servicesMap.values()) {
+            mGattServer.addService(service);
         }
-        
-        if (advertising) {
-            promise.resolve("Already Advertising");
-            return;
+        advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
+        AdvertiseSettings settings = new AdvertiseSettings.Builder()
+                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+                .setConnectable(true)
+                .build();
+
+
+        AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder()
+                .setIncludeDeviceName(true);
+        for (BluetoothGattService service : this.servicesMap.values()) {
+            dataBuilder.addServiceUuid(new ParcelUuid(service.getUuid()));
         }
-        advertiser.startAdvertising(advertisingSettings, advertisingData, advertisingCallback);
+        AdvertiseData data = dataBuilder.build();
+        Log.i("RNBLEModule", data.toString());
+
+        advertisingCallback = new AdvertiseCallback() {
+            @Override
+            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                super.onStartSuccess(settingsInEffect);
+                advertising = true;
+                promise.resolve("Success, Started Advertising");
+
+            }
+
+            @Override
+            public void onStartFailure(int errorCode) {
+                advertising = false;
+                Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
+                promise.reject("Advertising onStartFailure: " + errorCode);
+                super.onStartFailure(errorCode);
+            }
+        };
+
+        advertiser.startAdvertising(settings, data, advertisingCallback);
 
     }
     @ReactMethod
