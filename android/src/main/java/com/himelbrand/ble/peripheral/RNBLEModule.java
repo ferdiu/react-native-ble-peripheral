@@ -91,15 +91,15 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         @Override
         public void onConnectionStateChange(BluetoothDevice device, final int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                if (newState == BluetoothGatt.STATE_CONNECTED) {
-                    mBluetoothDevices.add(device);
-                } else if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                    mBluetoothDevices.remove(device);
-                }
+            boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
+            if (connected) {
+                mBluetoothDevices.add(device);
             } else {
                 mBluetoothDevices.remove(device);
             }
+            WritableMap map = Arguments.createMap();
+            map.putString("connected", String.valueOf(connected));
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("BleStatusChangeEvent", map);
         }
 
         @Override
