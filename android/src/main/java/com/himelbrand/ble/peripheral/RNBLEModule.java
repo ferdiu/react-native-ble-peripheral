@@ -47,7 +47,8 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     BluetoothGattServer mGattServer;
     BluetoothLeAdvertiser advertiser;
     AdvertiseCallback advertisingCallback;
-    AdvertiseSettings settings;
+    AdvertiseSettings advertisingSettings;
+    AdvertiseData advertisingData;
     String name;
     boolean advertising;
     private Context context;
@@ -157,7 +158,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
                 mGattServer.addService(service);
             }
             advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-            settings = new AdvertiseSettings.Builder()
+            advertisingSettings = new AdvertiseSettings.Builder()
                     .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
                     .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
                     .setConnectable(true)
@@ -169,8 +170,8 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             for (BluetoothGattService service : this.servicesMap.values()) {
                 dataBuilder.addServiceUuid(new ParcelUuid(service.getUuid()));
             }
-            AdvertiseData data = dataBuilder.build();
-            Log.i("RNBLEModule", data.toString());
+            AdvertiseData advertisingData = dataBuilder.build();
+            Log.i("RNBLEModule", advertisingData.toString());
 
             advertisingCallback = new AdvertiseCallback() {
                 @Override
@@ -195,7 +196,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             promise.resolve("Already Advertising");
             return;
         }
-        advertiser.startAdvertising(settings, data, advertisingCallback);
+        advertiser.startAdvertising(advertisingSettings, advertisingData, advertisingCallback);
 
     }
     @ReactMethod
