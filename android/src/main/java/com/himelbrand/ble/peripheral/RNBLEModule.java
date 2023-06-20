@@ -94,8 +94,6 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
             if (connected) {
                 mBluetoothDevices.add(device);
-                advertiser.stopAdvertising(advertisingCallback);
-                advertisingCallback = null;
             } else {
                 mBluetoothDevices.remove(device);
             }
@@ -197,12 +195,11 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     }
     @ReactMethod
     public void stop(){
-        Log.i("RNBLEModule", "stop1");
         if (mBluetoothAdapter !=null && mBluetoothAdapter.isEnabled() && advertiser != null) {
-            Log.i("RNBLEModule", "stop2");
             // If stopAdvertising() gets called before close() a null
             // pointer exception is raised.
             advertiser.stopAdvertising(advertisingCallback);
+            advertisingCallback = null;
         }
         advertising = false;
     }
