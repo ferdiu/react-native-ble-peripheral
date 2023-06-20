@@ -199,7 +199,6 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             // If stopAdvertising() gets called before close() a null
             // pointer exception is raised.
             advertiser.stopAdvertising(advertisingCallback);
-            advertisingCallback = null;
         }
         advertising = false;
     }
