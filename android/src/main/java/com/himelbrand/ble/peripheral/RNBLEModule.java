@@ -99,7 +99,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             }
             WritableMap map = Arguments.createMap();
             map.putString("connected", String.valueOf(connected));
-            map.putString("device", device.toString());
+            map.putString("device", device.getName());
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("BleStatusChangeEvent", map);
         }
 
