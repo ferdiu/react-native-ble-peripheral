@@ -94,6 +94,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
             if (connected) {
                 mBluetoothDevices.add(device);
+                advertiser.stopAdvertising(advertisingCallback);
             } else {
                 mBluetoothDevices.remove(device);
             }
