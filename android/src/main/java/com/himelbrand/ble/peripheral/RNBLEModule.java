@@ -95,6 +95,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             if (connected) {
                 mBluetoothDevices.add(device);
                 advertiser.stopAdvertising(advertisingCallback);
+                advertisingCallback = null;
             } else {
                 mBluetoothDevices.remove(device);
             }
@@ -171,23 +172,25 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         AdvertiseData data = dataBuilder.build();
         Log.i("RNBLEModule", data.toString());
 
-        advertisingCallback = new AdvertiseCallback() {
-            @Override
-            public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                super.onStartSuccess(settingsInEffect);
-                advertising = true;
-                promise.resolve("Success, Started Advertising");
+        if (advertisingCallback == null) {
+            advertisingCallback = new AdvertiseCallback() {
+                @Override
+                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+                    super.onStartSuccess(settingsInEffect);
+                    advertising = true;
+                    promise.resolve("Success, Started Advertising");
 
-            }
+                }
 
-            @Override
-            public void onStartFailure(int errorCode) {
-                advertising = false;
-                Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
-                promise.reject("Advertising onStartFailure: " + errorCode);
-                super.onStartFailure(errorCode);
-            }
-        };
+                @Override
+                public void onStartFailure(int errorCode) {
+                    advertising = false;
+                    Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
+                    promise.reject("Advertising onStartFailure: " + errorCode);
+                    super.onStartFailure(errorCode);
+                }
+            };
+        }
 
         advertiser.startAdvertising(settings, data, advertisingCallback);
 
