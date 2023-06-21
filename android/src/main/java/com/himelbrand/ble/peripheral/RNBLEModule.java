@@ -193,7 +193,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         // Ensures Bluetooth is available on the device and it is enabled. If not,
         // displays a dialog requesting user permission to enable Bluetooth.
 
-        mBluetoothDevices = new HashSet<>();
+        mBluetoothDevice = null;
         mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
         for (BluetoothGattService service : this.servicesMap.values()) {
             mGattServer.addService(service);
@@ -258,10 +258,8 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         boolean indicate = (characteristic.getProperties()
                 & BluetoothGattCharacteristic.PROPERTY_INDICATE)
                 == BluetoothGattCharacteristic.PROPERTY_INDICATE;
-        for (BluetoothDevice device : mBluetoothDevices) {
-            // true for indication (acknowledge) and false for notification (un-acknowledge).
-            mGattServer.notifyCharacteristicChanged(device, characteristic, indicate);
-        }
+
+        mGattServer.notifyCharacteristicChanged(mBluetoothDevice, characteristic, indicate);
     }
     @ReactMethod
     public void isAdvertising(Promise promise){
