@@ -156,33 +156,20 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     };
 
     @ReactMethod
-    public void reset(){
-        // Stop advertising if currently advertising
-        if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && advertiser != null) {
-            advertiser.stopAdvertising(advertisingCallback);
-        }
-
-        // Close the GATT server if it exists
+    public void reset() {
         if (mGattServer != null) {
             mGattServer.close();
+            mGattServer = null;
         }
-
-        // Reset the state of Bluetooth devices
-        mBluetoothDevice = null;
-
-        // Create a new GATT server and add services
-        mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
-        for (BluetoothGattService service : this.servicesMap.values()) {
-            mGattServer.addService(service);
-        }
-
-        // Reset advertiser and advertising state
-        advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-        advertisingCallback = null;
+        mBluetoothDevices.clear();
+        servicesMap.clear();
         advertising = false;
-
-        // Reset server ready state
         serverIsReady = false;
+        if (advertiser != null && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
+            advertiser.stopAdvertising(advertisingCallback);
+            advertiser = null;
+        }
+        advertisingCallback = null;
     }
 
     @ReactMethod
