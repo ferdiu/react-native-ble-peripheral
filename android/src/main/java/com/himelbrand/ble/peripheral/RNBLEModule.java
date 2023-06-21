@@ -41,7 +41,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
 
     ReactApplicationContext reactContext;
     HashMap<String, BluetoothGattService> servicesMap;
-    HashSet<BluetoothDevice> mBluetoothDevices;
+    BluetoothDevice mBluetoothDevice;
     BluetoothManager mBluetoothManager;
     BluetoothAdapter mBluetoothAdapter;
     BluetoothGattServer mGattServer;
@@ -105,9 +105,9 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
 
             boolean connected = status == BluetoothGatt.GATT_SUCCESS && newState == BluetoothGatt.STATE_CONNECTED;
             if (connected) {
-                mBluetoothDevices.add(device);
+                mBluetoothDevice = device;
             } else {
-                mBluetoothDevices.remove(device);
+                mBluetoothDevice = null;
             }
             WritableMap map = Arguments.createMap();
             map.putString("connected", String.valueOf(connected));
@@ -162,8 +162,13 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             advertiser.stopAdvertising(advertisingCallback);
         }
 
+        // Close the GATT server if it exists
+        if (mGattServer != null) {
+            mGattServer.close();
+        }
+
         // Reset the state of Bluetooth devices
-        mBluetoothDevices = new HashSet<>();
+        mBluetoothDevice = null;
 
         // Create a new GATT server and add services
         mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
