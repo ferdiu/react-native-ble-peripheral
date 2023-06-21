@@ -161,7 +161,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             mGattServer.close();
             mGattServer = null;
         }
-        mBluetoothDevices.clear();
+        mBluetoothDevice = null;
         servicesMap.clear();
         advertising = false;
         serverIsReady = false;
