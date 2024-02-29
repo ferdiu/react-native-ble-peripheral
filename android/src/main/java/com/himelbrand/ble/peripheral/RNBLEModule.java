@@ -19,6 +19,7 @@ import android.util.Log;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.UUID;
+import java.nio.charset.StandardCharsets;
 
 import com.facebook.react.bridge.NativeModule;
 import com.facebook.react.bridge.ReactApplicationContext;
@@ -86,6 +87,14 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     public void addCharacteristicToService(String serviceUUID, String uuid, Integer permissions, Integer properties) {
         UUID CHAR_UUID = UUID.fromString(uuid);
         BluetoothGattCharacteristic tempChar = new BluetoothGattCharacteristic(CHAR_UUID, properties, permissions);
+        this.servicesMap.get(serviceUUID).addCharacteristic(tempChar);
+    }
+
+    @ReactMethod
+    public void addCharacteristicToServiceWithValue(String serviceUUID, String uuid, Integer permissions, Integer properties, String value) {
+        UUID CHAR_UUID = UUID.fromString(uuid);
+        BluetoothGattCharacteristic tempChar = new BluetoothGattCharacteristic(CHAR_UUID, properties, permissions);
+        tempChar.setValue(value.getBytes(StandardCharsets.UTF_8));
         this.servicesMap.get(serviceUUID).addCharacteristic(tempChar);
     }
 
