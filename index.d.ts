@@ -6,6 +6,13 @@ declare module "react-native-ble-peripheral" {
     permissions: number,
     properties: number
   ): void;
+  function addCharacteristicToServiceWithValue(
+    ServiceUUID: string,
+    UUID: string,
+    permissions: number,
+    properties: number,
+    value: string
+  ): void;
   function sendNotificationToDevices(
     ServiceUUID: string,
     CharacteristicUUID: string,
