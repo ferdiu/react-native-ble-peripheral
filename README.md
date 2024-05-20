@@ -11,7 +11,7 @@ for all ready parts see documentation below.
 - fixed issues fixed on github repo in npm package - starting from version 1.2.0
 - **IOS support was added in version 2.0.0**
 - merged PR to fix write charicaristics - version 2.0.1
-    
+
 ### Still missing
 
 if you would like to contribute to this project or suggest more future features you're welcome to so via an issue or pull request.
@@ -24,7 +24,7 @@ right now this package does not support IOS, so any one that wants to help and c
 
 ```bash
 npm install react-native-ble-peripheral --save
-or 
+or
 yarn add react-native-ble-peripheral
 ```
 npm page - https://www.npmjs.com/package/react-native-ble-peripheral
@@ -34,13 +34,20 @@ npm page - https://www.npmjs.com/package/react-native-ble-peripheral
 
  <uses-permission android:name="android.permission.BLUETOOTH"/>
  <uses-permission android:name="android.permission.BLUETOOTH_ADMIN"/>
+ <uses-permission android:name="android.permission.BLUETOOTH_CONNECT"/>
+ <uses-permission android:name="android.permission.BLUETOOTH_ADVERTISE"/>
 ```
 ## Project setup and initialization auto
 ```bash
 react-native link
 ```
-## Project setup and initialization manually 
+or, for react-native >= 0.60:
+```bash
+npx react-native-asset
+```
+## Project setup and initialization manually
 
+### React Native react-native < 0.60:
 * In `android/settings.gradle`
 
 ```gradle
@@ -82,6 +89,20 @@ public class MainActivity extends ReactActivity {
 }
 ```
 
+### React Native react-native < 0.60:
+
+Add the following to yout `react-native.config.js` file:
+
+```javascript
+module.exports = {
+  dependencies: {
+    // HERE YOUR OTHER DEPENDENCIES
+    'react-native-ble-peripheral': { // <--- Add this
+      root: path.join(__dirname, 'node_modules/react-native-ble-peripheral'), // <--- Add this
+    } // <--- Add this
+  },
+};
+```
 
 ## Usage
 
@@ -91,7 +112,7 @@ public class MainActivity extends ReactActivity {
 import BLEPeripheral from 'react-native-ble-peripheral'
 ```
 
-#### Add Service 
+#### Add Service
 BLEPeripheral.addService(UUID:string, primary:boolean)
 ```javascript
 BLEPeripheral.addService('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', true) //for primary service
@@ -106,7 +127,7 @@ the link above is for permissions and properties constants info
 Permissions:
 * 1 - Readable
 * 2 - Readable Encrypted
-* 4 - Readable Encrypted MITM (Man-in-the-middle) Protection 
+* 4 - Readable Encrypted MITM (Man-in-the-middle) Protection
 * 16 - Writable
 * 32 - Writable Encrypted
 * 64 - Writable Encrypted MITM Protection
@@ -127,14 +148,14 @@ Properties:
 BLEPeripheral.addCharacteristicToService('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 16 | 1, 8) //this is a Characteristic with read and write permissions and notify property
 ```
 #### Notify to devices
-BLEPeripheral.sendNotificationToDevices(ServiceUUID:string, CharacteristicUUID:string, data:byte[]) 
+BLEPeripheral.sendNotificationToDevices(ServiceUUID:string, CharacteristicUUID:string, data:byte[])
 - note #1: in js it's not really a byte array, but an array of numbers
 - note #2: the CharacteristicUUID must be of a Characteristic with notify property
 ```javascript
 BLEPeripheral.sendNotificationToDevices('XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX', [0x10,0x01,0xA1,0x80]) //sends a notification to all connected devices that, using the char uuid given
 ```
 
-#### start Advertising 
+#### start Advertising
 note:use this only after adding services and characteristics
 ```javascript
  BLEPeripheral.start()
@@ -153,7 +174,7 @@ In case of error, these are the error codes:
 * 5 - This feature is not supported on this platform.
 
 
-#### stop Advertising 
+#### stop Advertising
 ```javascript
  BLEPeripheral.stop()
 ```
@@ -166,6 +187,6 @@ This method sets the name of the device broadcast, before calling `start`.
 BLEPeripheral.setName('RNBLETEST')
 ```
 
-DOCs and project is under development 
+DOCs and project is under development
 Any help would be welcome...
 feel free to contact me
