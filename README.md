@@ -187,6 +187,24 @@ This method sets the name of the device broadcast, before calling `start`.
 BLEPeripheral.setName('RNBLETEST')
 ```
 
+#### Handling write requests
+This is an example on how you would handle the write requests:
+```typescript
+import { NativeEventEmitter, NativeModules } from 'react-native';
+
+const { RNBLEModule } = NativeModules;
+const eventEmitter = new NativeEventEmitter(RNBLEModule);
+
+eventEmitter.addListener('WriteEvent', (map) => {
+  // Handle the event
+  console.log('WriteEvent received:', map);
+});
+
+// Don't forget to remove the listener when it's no longer needed to avoid memory leaks
+// eventEmitter.removeAllListeners('WriteEvent');
+```
+
+
 DOCs and project is under development
 Any help would be welcome...
 feel free to contact me
