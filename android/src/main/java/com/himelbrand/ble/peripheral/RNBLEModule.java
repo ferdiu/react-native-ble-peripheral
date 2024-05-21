@@ -98,11 +98,18 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         this.servicesMap.get(serviceUUID).addCharacteristic(tempChar);
     }
 
+    @ReactMethod
+    public void setCharacteristicValue(String serviceUUID, String characteriscUUID, String value) {
+        UUID CHAR_UUID = UUID.fromString(characteriscUUID);
+        BluetoothGattCharacteristic tempChar = this.servicesMap.get(serviceUUID).getCharacteristic(CHAR_UUID);
+        tempChar.setValue(value.getBytes(StandardCharsets.UTF_8));
+    }
+
     private final BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {
         @Override
         public void onConnectionStateChange(BluetoothDevice device, final int status, int newState) {
             super.onConnectionStateChange(device, status, newState);
-            
+
             if (!serverIsReady) {
                 invalidDeviceAddress = device.toString();
                 return;
@@ -156,9 +163,10 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
                 data.pushInt((int) b);
             }
             map.putArray("data", data);
+            map.putString("characteristic", characteristic.getUuid().toString());
             map.putString("device", device.toString());
             if (responseNeeded) {
-                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, (value.toString() + "_c_").getBytes(StandardCharsets.UTF_8));
             }
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("WriteEvent", map);
         }

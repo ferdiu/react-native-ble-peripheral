@@ -36,6 +36,18 @@ declare module "react-native-ble-peripheral" {
     value: string,
   ): void;
   /**
+   * Sets the value of a characteristic on a Bluetooth device.
+   *
+   * @param ServiceUUID - The UUID of the service that the characteristic belongs to.
+   * @param CharacteristicUUID - The UUID of the characteristic to set the value for.
+   * @param value - The value to set the characteristic to, as a string.
+   */
+  function setCharacteristicValue(
+      ServiceUUID: string,
+      CharacteristicUUID: string,
+      value: string
+  ): void;
+  /**
    * Sends a notification to connected devices using the specified service and characteristic UUIDs.
    *
    * @param ServiceUUID - The UUID of the service to use for the notification.

@@ -12,25 +12,25 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
     var manager: CBPeripheralManager!
     var startPromiseResolve: RCTPromiseResolveBlock?
     var startPromiseReject: RCTPromiseRejectBlock?
-    
+
     override init() {
         super.init()
         manager = CBPeripheralManager(delegate: self, queue: nil, options: nil)
         print("BLEPeripheral initialized, advertising: \(advertising)")
     }
-    
+
     //// PUBLIC METHODS
 
     @objc func setName(_ name: String) {
         self.name = name
         print("name set to \(name)")
     }
-    
+
     @objc func isAdvertising(_ resolve: RCTPromiseResolveBlock, rejecter reject: RCTPromiseRejectBlock) {
         resolve(advertising)
         print("called isAdvertising")
     }
-    
+
     @objc(addService:primary:)
     func addService(_ uuid: String, primary: Bool) {
         let serviceUUID = CBUUID(string: uuid)
@@ -44,7 +44,7 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
             alertJS("service \(uuid) already there")
         }
     }
-    
+
     @objc(addCharacteristicToService:uuid:permissions:properties:data:)
     func addCharacteristicToService(_ serviceUUID: String, uuid: String, permissions: UInt, properties: UInt, data: String) {
         let characteristicUUID = CBUUID(string: uuid)
@@ -55,13 +55,24 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
         servicesMap[serviceUUID]?.characteristics?.append(characteristic)
         print("added characteristic to service")
     }
-    
+
+    @objc(setCharacteristicValue:uuid:data:)
+    func addCharacteristicToService(_ serviceUUID: String, uuid: String, value: String) {
+        alertJS("you reached untested code: unfortunately I can't test this but you are welcomed to")
+        return
+        let characteristicUUID = CBUUID(string: uuid)
+        let byteData: Data = value.data(using: .utf8)!
+        let characteristic = getCharacteristicForService(servicesMap[serviceUUID], uuid)
+        char.value = byteData
+        print("added characteristic to service")
+    }
+
     @objc func start(_ resolve: @escaping RCTPromiseResolveBlock, rejecter reject: @escaping RCTPromiseRejectBlock) {
         if (manager.state != .poweredOn) {
             alertJS("Bluetooth turned off")
             return;
         }
-        
+
         startPromiseResolve = resolve
         startPromiseReject = reject
 
@@ -71,7 +82,7 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
             ] as [String : Any]
         manager.startAdvertising(advertisementData)
     }
-    
+
     @objc func stop() {
         manager.stopAdvertising()
         advertising = false
@@ -98,7 +109,7 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
             alertJS("service \(serviceUUID) does not exist")
         }
     }
-    
+
     //// EVENTS
 
     // Respond to Read request
@@ -175,7 +186,7 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
         startPromiseResolve!(advertising)
         print("advertising succeeded!")
     }
-    
+
     //// HELPERS
 
     func getCharacteristic(_ characteristicUUID: CBUUID) -> CBCharacteristic? {
@@ -229,7 +240,7 @@ class BLEPeripheral: RCTEventEmitter, CBPeripheralManagerDelegate {
     override func startObserving() { hasListeners = true }
     override func stopObserving() { hasListeners = false }
     @objc override static func requiresMainQueueSetup() -> Bool { return false }
-    
+
 }
 
 @available(iOS 10.0, *)
