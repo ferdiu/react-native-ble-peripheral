@@ -261,6 +261,8 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     }
     @ReactMethod
     public void sendNotificationToDevices(String serviceUUID,String charUUID,ReadableArray message) {
+        if (null == mBluetoothDevice) return;
+
         byte[] decoded = new byte[message.size()];
         for (int i = 0; i < message.size(); i++) {
             decoded[i] = new Integer(message.getInt(i)).byteValue();
