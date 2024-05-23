@@ -126,7 +126,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
                 mBluetoothDevice = null;
             }
             WritableMap map = Arguments.createMap();
-            map.putString("connected", String.valueOf(connected));
+            map.putBoolean("connected", connected);
             map.putString("device", device.toString());
             map.putString("invalidDeviceAddress", invalidDeviceAddress);
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("BleStatusChangeEvent", map);
