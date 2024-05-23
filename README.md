@@ -187,7 +187,7 @@ This method sets the name of the device broadcast, before calling `start`.
 BLEPeripheral.setName('RNBLETEST')
 ```
 
-#### Handling write requests
+#### Handling events
 This is an example on how you would handle the write requests:
 ```typescript
 import { NativeEventEmitter, NativeModules } from 'react-native';
@@ -204,6 +204,13 @@ eventEmitter.addListener('WriteEvent', (map) => {
 // eventEmitter.removeAllListeners('WriteEvent');
 ```
 
+All the available events are:
+- `BleStatusChangeEvent`: emitted when BLE status changes;
+- `ReadEvent`: emitted when a read request is handled;
+- `WriteEvent`: emitted when a write request is handled;
+- `NotificationEvent`: emitted when a notification is sent.
+
+**NB** Events are not working on iOS. Sorry :(
 
 DOCs and project is under development
 Any help would be welcome...

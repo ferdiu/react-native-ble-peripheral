@@ -32,7 +32,7 @@ import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.WritableArray;
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 
-
+/** TODO: add some checks over characteristics existing */
 
 /**
  * {@link NativeModule} that allows JS to open the default browser
@@ -143,11 +143,19 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             }
             mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS,
                     offset, characteristic.getValue());
+            WritableMap map = Arguments.createMap();
+            map.putString("device", device.toString());
+            map.putString("characteristic", characteristic.getUuid().toString());
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("ReadEvent", map);
         }
 
         @Override
         public void onNotificationSent(BluetoothDevice device, int status) {
             super.onNotificationSent(device, status);
+            WritableMap map = Arguments.createMap();
+            map.putString("device", device.toString());
+            map.putInt("status", status);
+            reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("NotificationEvent", map);
         }
 
         @Override
@@ -166,7 +174,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             map.putString("characteristic", characteristic.getUuid().toString());
             map.putString("device", device.toString());
             if (responseNeeded) {
-                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, (value.toString() + "_c_").getBytes(StandardCharsets.UTF_8));
+                mGattServer.sendResponse(device, requestId, BluetoothGatt.GATT_SUCCESS, offset, value);
             }
             reactContext.getJSModule(DeviceEventManagerModule.RCTDeviceEventEmitter.class).emit("WriteEvent", map);
         }
