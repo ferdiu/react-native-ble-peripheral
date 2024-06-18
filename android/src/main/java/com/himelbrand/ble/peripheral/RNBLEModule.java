@@ -280,4 +280,14 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         promise.resolve(this.advertising);
     }
 
+    // Required for rn built in EventEmitter Calls.
+    @ReactMethod
+    public void addListener(String eventName) {
+
+    }
+
+    @ReactMethod
+    public void removeListeners(Integer count) {
+
+    }
 }
