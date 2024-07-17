@@ -19,6 +19,7 @@ import android.util.Log;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.UUID;
 import java.nio.charset.StandardCharsets;
 
@@ -215,8 +216,26 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
 
         mBluetoothDevice = null;
         mGattServer = mBluetoothManager.openGattServer(reactContext, mGattServerCallback);
-        for (BluetoothGattService service : this.servicesMap.values()) {
-            mGattServer.addService(service);
+        ArrayList<String> systemGattServicesUuids = new ArrayList<String>();
+        for (BluetoothGattService service : mGattServer.getServices()) {
+            systemGattServicesUuids.add(service.getUuid().toString());
+        }
+
+        ArrayList<BluetoothGattService> servicesToAdd = new ArrayList(this.servicesMap.values());
+        for (int i = 0; i < servicesToAdd.size(); i ++) {
+            BluetoothGattService service = servicesToAdd.get(i);
+            // if the service is already in the system service than do not add it again
+            //    but populate it with defined characteristics and replace the user
+            //    defined one with the system one in the servicesMap
+            if (systemGattServicesUuids.contains(service.getUuid().toString())) {
+                BluetoothGattService sysServ = mGattServer.getService(service.getUuid());
+                for (BluetoothGattCharacteristic characteristic : service.getCharacteristics()) {
+                    sysServ.addCharacteristic(characteristic);
+                }
+                this.servicesMap.replace(service.getUuid().toString(), sysServ);
+            } else {
+                mGattServer.addService(service);
+            }
         }
         advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
         AdvertiseSettings settings = new AdvertiseSettings.Builder()
@@ -260,7 +279,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     }
     @ReactMethod
     public void stop(){
-        if (mBluetoothAdapter !=null && mBluetoothAdapter.isEnabled() && advertiser != null) {
+        if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && advertiser != null) {
             // If stopAdvertising() gets called before close() a null
             // pointer exception is raised.
             advertiser.stopAdvertising(advertisingCallback);
