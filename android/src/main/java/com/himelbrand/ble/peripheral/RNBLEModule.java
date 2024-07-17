@@ -7,6 +7,7 @@ import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattServer;
 import android.bluetooth.BluetoothGattServerCallback;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
@@ -103,6 +104,13 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         UUID CHAR_UUID = UUID.fromString(characteriscUUID);
         BluetoothGattCharacteristic tempChar = this.servicesMap.get(serviceUUID).getCharacteristic(CHAR_UUID);
         tempChar.setValue(value.getBytes(StandardCharsets.UTF_8));
+    }
+
+    @ReactMethod
+    public void addDescriptorToCharacteristic(String serviceUUID, String characteristicUUID, String uuid, Integer permissions) {
+        UUID DESC_UUID = UUID.fromString(uuid);
+        BluetoothGattDescriptor tempDesc = new BluetoothGattDescriptor(DESC_UUID, permissions);
+        this.servicesMap.get(serviceUUID).getCharacteristic(UUID.fromString(characteristicUUID)).addDescriptor(tempDesc);
     }
 
     private final BluetoothGattServerCallback mGattServerCallback = new BluetoothGattServerCallback() {

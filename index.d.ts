@@ -22,14 +22,14 @@ declare module "react-native-ble-peripheral" {
   /**
    * Adds a characteristic to a service with the specified value.
    *
-   * @param ServiceUUID - The UUID of the service to add the characteristic to.
+   * @param serviceUUID - The UUID of the service to add the characteristic to.
    * @param UUID - The UUID of the characteristic to add.
    * @param permissions - The permissions for the characteristic.
    * @param properties - The properties of the characteristic.
    * @param value - The value to set for the characteristic.
    */
   function addCharacteristicToServiceWithValue(
-    ServiceUUID: string,
+    serviceUUID: string,
     UUID: string,
     permissions: number,
     properties: number,
@@ -38,14 +38,28 @@ declare module "react-native-ble-peripheral" {
   /**
    * Sets the value of a characteristic on a Bluetooth device.
    *
-   * @param ServiceUUID - The UUID of the service that the characteristic belongs to.
+   * @param serviceUUID - The UUID of the service that the characteristic belongs to.
    * @param CharacteristicUUID - The UUID of the characteristic to set the value for.
    * @param value - The value to set the characteristic to, as a string.
    */
   function setCharacteristicValue(
-      ServiceUUID: string,
+      serviceUUID: string,
       CharacteristicUUID: string,
       value: string
+  ): void;
+  /**
+   * Adds a descriptor to a characteristic.
+   *
+   * @param serviceUUID - The UUID of the service that the characteristic belongs to.
+   * @param characteristicUUID - The UUID of the characteristic to add the descriptor to.
+   * @param uuid - The UUID of the descriptor to add.
+   * @param permissions - The permissions for the descriptor.
+   */
+  function addDescriptorToCharacteristic(
+    serviceUUID: string,
+    characteristicUUID: string,
+    uuid: string,
+    permissions: number
   ): void;
   /**
    * Sends a notification to connected devices using the specified service and characteristic UUIDs.
