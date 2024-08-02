@@ -12,6 +12,9 @@ import android.bluetooth.BluetoothManager;
 import android.bluetooth.le.AdvertiseCallback;
 import android.bluetooth.le.AdvertiseData;
 import android.bluetooth.le.AdvertiseSettings;
+import android.bluetooth.le.AdvertisingSetParameters;
+import android.bluetooth.le.AdvertisingSetCallback;
+import android.bluetooth.le.AdvertisingSet;
 import android.bluetooth.le.BluetoothLeAdvertiser;
 import android.content.Context;
 import android.os.ParcelUuid;
@@ -49,7 +52,7 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
     BluetoothAdapter mBluetoothAdapter;
     BluetoothGattServer mGattServer;
     BluetoothLeAdvertiser advertiser;
-    AdvertiseCallback advertisingCallback;
+    AdvertisingSetCallback advertisingCallback;
     String name;
     boolean advertising;
     private String invalidDeviceAddress = null;
@@ -200,7 +203,8 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
         advertising = false;
         serverIsReady = false;
         if (advertiser != null && mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
-            advertiser.stopAdvertising(advertisingCallback);
+            advertiser.stopAdvertisingSet(advertisingCallback);
+            // advertiser.stopAdvertising(advertisingCallback);
             advertiser = null;
         }
         advertisingCallback = null;
@@ -238,51 +242,87 @@ public class RNBLEModule extends ReactContextBaseJavaModule{
             }
         }
         advertiser = mBluetoothAdapter.getBluetoothLeAdvertiser();
-        AdvertiseSettings settings = new AdvertiseSettings.Builder()
-                .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
-                .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+        // AdvertiseSettings settings = new AdvertiseSettings.Builder()
+        //         .setAdvertiseMode(AdvertiseSettings.ADVERTISE_MODE_LOW_LATENCY)
+        //         .setTxPowerLevel(AdvertiseSettings.ADVERTISE_TX_POWER_HIGH)
+        //         .setConnectable(true)
+        //         .setTimeout(0) // no timeout
+        //         .build();
+
+        AdvertisingSetParameters parameters = new AdvertisingSetParameters.Builder()
+                .setLegacyMode(true) // Use extended advertising
+                .setIncludeTxPower(false)
+                .setScannable(true) // TODO: test to set this true and the one below false
                 .setConnectable(true)
+                .setInterval(AdvertisingSetParameters.INTERVAL_HIGH)
+                .setTxPowerLevel(AdvertisingSetParameters.TX_POWER_HIGH)
                 .build();
 
-
-        AdvertiseData.Builder dataBuilder = new AdvertiseData.Builder()
+        // --- ADVERTISING DATA ---
+        AdvertiseData.Builder advertiseDataBuilder = new AdvertiseData.Builder()
                 .setIncludeDeviceName(true);
+        AdvertiseData advertiseData = advertiseDataBuilder.build();
+        Log.i("RNBLEModule", advertiseData.toString());
+
+        // --- SCAN RESPONSE DATA ---
+        AdvertiseData.Builder scanResponseDataBuilder = new AdvertiseData.Builder()
+                .setIncludeTxPowerLevel(true);
         for (BluetoothGattService service : this.servicesMap.values()) {
-            dataBuilder.addServiceUuid(new ParcelUuid(service.getUuid()));
+            scanResponseDataBuilder.addServiceUuid(new ParcelUuid(service.getUuid()));
         }
-        AdvertiseData data = dataBuilder.build();
-        Log.i("RNBLEModule", data.toString());
+        AdvertiseData scanResponseData = scanResponseDataBuilder.build();
+        Log.i("RNBLEModule", scanResponseData.toString());
 
         if (advertisingCallback == null) {
-            advertisingCallback = new AdvertiseCallback() {
-                @Override
-                public void onStartSuccess(AdvertiseSettings settingsInEffect) {
-                    super.onStartSuccess(settingsInEffect);
-                    advertising = true;
-                    promise.resolve("Success, Started Advertising");
+            // OLD
+            // advertisingCallback = new AdvertiseCallback() {
+            //     @Override
+            //     public void onStartSuccess(AdvertiseSettings settingsInEffect) {
+            //         super.onStartSuccess(settingsInEffect);
+            //         advertising = true;
+            //         promise.resolve("Success, Started Advertising");
+            //     }
 
+            //     @Override
+            //     public void onStartFailure(int errorCode) {
+            //         advertising = false;
+            //         Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
+            //         promise.reject("Advertising onStartFailure: " + errorCode);
+            //         super.onStartFailure(errorCode);
+            //     }
+            // };
+            advertisingCallback = new AdvertisingSetCallback() {
+                @Override
+                public void onAdvertisingSetStarted(AdvertisingSet advertisingSet, int txPower, int status) {
+                    super.onAdvertisingSetStarted(advertisingSet, txPower, status);
+                    if (advertisingSet == null) {
+                        advertising = false;
+                        Log.e("RNBLEModule", "Advertising onAdvertisingSetStarted: " + status);
+                        promise.reject("Advertising onAdvertisingSetStarted: " + status);
+                    } else {
+                        advertising = true;
+                        promise.resolve("Success, Started Advertising");
+                    }
                 }
 
                 @Override
-                public void onStartFailure(int errorCode) {
-                    advertising = false;
-                    Log.e("RNBLEModule", "Advertising onStartFailure: " + errorCode);
-                    promise.reject("Advertising onStartFailure: " + errorCode);
-                    super.onStartFailure(errorCode);
+                public void onAdvertisingSetStopped(AdvertisingSet advertisingSet) {
+                    super.onAdvertisingSetStopped(advertisingSet);
                 }
             };
         }
 
-        advertiser.startAdvertising(settings, data, advertisingCallback);
+        advertiser.startAdvertisingSet(parameters, advertiseData, scanResponseData, null, null, advertisingCallback);
+        // advertiser.startAdvertising(settings, advertiseData, advertisingCallback);
         serverIsReady = true;
-
     }
     @ReactMethod
     public void stop(){
         if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled() && advertiser != null) {
             // If stopAdvertising() gets called before close() a null
             // pointer exception is raised.
-            advertiser.stopAdvertising(advertisingCallback);
+            advertiser.stopAdvertisingSet(advertisingCallback);
+            // advertiser.stopAdvertising(advertisingCallback);
         }
         advertising = false;
     }
